@@ -24,9 +24,11 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Surface;
 import android.view.View;
+import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -548,9 +550,7 @@ public class LiveVideoBroadcaster extends Service implements ILiveVideoBroadcast
 
         int diff = Integer.MAX_VALUE;
         Resolution choosenSize = null;
-        int diff = Integer.MAX_VALUE;
-        Resolution choosenSize = null;
-        Resolution deviceResolution = Resolution.newLikeDeviceResolution(this);
+        Resolution deviceResolution = newLikeDeviceResolution(this);
         double deviceAspectRatio = (double) deviceResolution.width / (double) deviceResolution.height;
         for (int i = 0; i < previewSizeList.size(); i++) {
             Camera.Size size = previewSizeList.get(i);
@@ -603,6 +603,23 @@ public class LiveVideoBroadcaster extends Service implements ILiveVideoBroadcast
         this.previewSize = new Resolution(size.width, size.height);
 
         return len;
+    }
+
+    public static Resolution newLikeDeviceResolution(Context context) {
+        DisplayMetrics metrics = new DisplayMetrics();
+        WindowManager window = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        if (window.getDefaultDisplay() == null) {
+            Log.e("Resolution", "Window manager not found return default res 1280x720");
+            return new Resolution(1280, 720);
+        }
+        window.getDefaultDisplay().getMetrics(metrics);
+        int deviceWidth = metrics.widthPixels;
+        int deviceHeight = metrics.heightPixels;
+        if (metrics.widthPixels < metrics.heightPixels) {
+            deviceWidth = metrics.heightPixels;
+            deviceHeight = metrics.widthPixels;
+        }
+        return new Resolution(deviceWidth, deviceHeight);
     }
 
 
